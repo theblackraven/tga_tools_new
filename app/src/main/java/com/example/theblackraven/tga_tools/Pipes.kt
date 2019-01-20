@@ -11,7 +11,7 @@ class Pipes{
     var k  : Float = 0f
     var dn : Int = 10
 
-    constructor(typ:String, manufacturer:String, typ_manufacturer:String, diameter_out:Float, diameter_in:Float, k:Float, dn:Int){
+    constructor(typ:String = "default_typ", manufacturer:String  = "default_manufacturer", typ_manufacturer:String = "default_typ_manufacturer", diameter_out:Float = 0f , diameter_in:Float = 0f, k:Float = 0f, dn:Int = 0){
         this.typ = typ
         this.manufacturer = manufacturer
         this.typ_manufacturer = typ_manufacturer
@@ -20,6 +20,7 @@ class Pipes{
         this.k = k
         this.dn = dn
     }
+
     constructor(){
     }
 

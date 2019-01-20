@@ -68,11 +68,35 @@ class DataBaseHandler(var context: Context) : SQLiteOpenHelper(context,DATABASE_
             do {
                 var pipe = Pipes()
                 pipe.id = result.getString(result.getColumnIndex(COL_ID)).toInt()
-                pipe.pipe = result.getString(result.getColumnIndex(COL_PIPETYP))
+                pipe.typ = result.getString(result.getColumnIndex(COL_PIPETYP))
+                pipe.manufacturer = result.getString(result.getColumnIndex(COL_PIPEMANUFACTURER))
+                pipe.typ_manufacturer = result.getString(result.getColumnIndex(COL_TYPPIPEMANUFACTURER))
+                pipe.dn = result.getString(result.getColumnIndex(COL_PIPE_DO)).toInt()
                 pipe.diameter_in = result.getString(result.getColumnIndex(COL_PIPE_DI)).toFloat()
                 pipe.diameter_out = result.getString(result.getColumnIndex(COL_PIPE_DO)).toFloat()
                 pipe.k = result.getString(result.getColumnIndex(COL_PIPE_K)).toFloat()
                 list.add(pipe)
+            }while (result.moveToNext())
+        }
+
+        result.close()
+        db.close()
+        return list
+    }
+
+
+    fun readManufacturersPipes() : MutableList<String>{
+        var list : MutableList<String> = ArrayList()
+
+        val db = this.readableDatabase
+        val query = "SELECT DISTINCT " + COL_PIPEMANUFACTURER + " from " + TABLE_NAME_PIPES // + " GROUP BY " + COL_PIPEMANUFACTURER
+        val result = db.rawQuery(query,null)
+        print(result)
+        if(result.moveToFirst()){
+            do {
+                var manufacturer : String
+                manufacturer = result.getString(result.getColumnIndex(COL_PIPEMANUFACTURER)).toString()
+                list.add(manufacturer)
             }while (result.moveToNext())
         }
 
