@@ -14,26 +14,21 @@ class MainActivity : AppCompatActivity() {
         val context = this
         var db = DataBaseHandler(context)
         btn_insert.setOnClickListener {
-            if (etvPipe.text.toString().length > 0 &&
-                    etvPipe.text.toString().length > 0) {
-                var user = Pipes(etvPipe.text.toString(),0,0,etvk.text.toString().toInt())
-                db.insertData(user)
+            if (etv.text.toString().length > 0 &&
+                    etvDi.text.toString().toFloat() > 0 && etvDo.text.toString().toFloat() > 0  &&  etvk.text.toString().toFloat() > 0 ) {
+                var pipe = Pipes(etvPipe.text.toString(),etvDo.text.toString().toFloat(),etvDi.text.toString().toFloat(),etvk.text.toString().toFloat())
+                db.insertDataPipes(pipe)
             } else {
                 Toast.makeText(context,"Please Fill All Data's",Toast.LENGTH_SHORT).show()
             }
         }
 
         btn_read.setOnClickListener({
-            var data = db.readData()
+            var data = db.readDataPipes()
             tvResult.text = ""
             for (i in 0..(data.size - 1)) {
-                tvResult.append(data.get(i).id.toString() + " " + data.get(i).pipe + " " + data.get(i).k + "\n")
+                tvResult.append(data.get(i).id.toString() + " " + data.get(i). + " " + data.get(i).k + "\n")
             }
-        })
-
-        btn_update.setOnClickListener({
-            db.updateData()
-            btn_read.performClick()
         })
 
         btn_delete.setOnClickListener({

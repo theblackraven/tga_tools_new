@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">TGA-Tools</string>
+    <string name="pipetyp">Rohrtyp</string>
+    <string name="pipe_manufacturer">Hersteller</string>
+    <string name="pipe_di">Innendruchmesser</string>
+    <string name="pipe_do">Außendruchmesser</string>
+    <string name="pip_k">Rohrrauhigkeit</string>
+    <string name="spinner_pipetyp">Rohrtyp</string>
+    <string name="new_item">"New"</string>
 </resources>

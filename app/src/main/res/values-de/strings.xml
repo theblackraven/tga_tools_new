@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TGA-Tools</string>
+    <string name="Pipename">Rohrname</string>
+    <string name="DI">Innendruchmesser</string>
+</resources>
