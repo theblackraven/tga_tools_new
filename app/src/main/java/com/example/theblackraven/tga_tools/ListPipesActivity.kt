@@ -1,6 +1,7 @@
 package com.example.theblackraven.tga_tools
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
@@ -11,6 +12,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import kotlinx.android.synthetic.main.activity_listpipes.*
+import android.content.DialogInterface
+
+
 
 class ListPipesActivity : AppCompatActivity() {
 
@@ -122,13 +126,29 @@ class ListPipesActivity : AppCompatActivity() {
             }
 
             this.ivDelete.setOnClickListener{
-                var db = DataBaseHandler(context)
-                db.DeleteDataPipes(db_id)
-                (context as Activity).finish()
+                val builder = AlertDialog.Builder(this.context)
 
-                //Reload activity to refresh Data
-                val intent = Intent(this.context, ListPipesActivity::class.java)
-                this.context.startActivity(intent)
+                builder.setTitle("Bestätigen")
+                builder.setMessage("Eintrag wirklich löschen?")
+
+                builder.setPositiveButton("YES"){dialog, which ->
+                    var db = DataBaseHandler(context)
+                    db.DeleteDataPipes(db_id)
+                    (context as Activity).finish()
+
+                    //Reload activity to refresh Data
+                    val intent = Intent(this.context, ListPipesActivity::class.java)
+                    this.context.startActivity(intent)
+                }
+
+                builder.setNegativeButton("No"){dialog, which ->
+
+                    dialog.dismiss()
+                }
+
+                val dialog: AlertDialog = builder.create()
+                dialog.show()
+
             }
         }
     }

@@ -34,6 +34,9 @@ class InsertNewPipesActivity : AppCompatActivity() {
         var db_id : String? = null
         var pipe : Pipes?
         var manufacturers = mutableListOf<String>("Alle")
+        var pipe_typ = mutableListOf<String>("Alle")
+        var manufacturer_typ = mutableListOf<String>("Alle")
+        var dn = mutableListOf<Int>(8, 10, 12, 15, 20)
 
         if(bundle!=null) {
             db_id= bundle.getString(KEY_WORDS_INSERTNEWPIPESACTIVITY.DB_ID)
@@ -57,24 +60,64 @@ class InsertNewPipesActivity : AppCompatActivity() {
         }
 
 
+        //get existing manufactuer
+
         var data_manufactures = db.Get_DB_Column_String_DISTINCT(Constants_DB_Pipes.TABLE_NAME_PIPES, Constants_DB_Pipes.COL_PIPEMANUFACTURER)
         for (i in 0..(data_manufactures.size - 1)) {
             manufacturers.add(data_manufactures.get(i))
         }
 
+        //get existing pipe_typ
+        var data_typ = db.Get_DB_Column_String_DISTINCT(Constants_DB_Pipes.TABLE_NAME_PIPES, Constants_DB_Pipes.COL_PIPETYP)
+        for (i in 0..(data_typ.size - 1)) {
+            pipe_typ.add(data_typ.get(i))
+        }
+
+        //get existing typ of manufactuer
+        var data_manufacturer_typ = db.Get_DB_Column_String_DISTINCT(Constants_DB_Pipes.TABLE_NAME_PIPES, Constants_DB_Pipes.COL_TYPPIPEMANUFACTURER)
+        for (i in 0..(data_manufacturer_typ.size - 1)) {
+            manufacturer_typ.add(data_manufacturer_typ.get(i))
+        }
+
+
         // Initialize a new array adapter object
-        val adapter = ArrayAdapter<String>(
+        val adapter_manufacturer = ArrayAdapter<String>(
                 this, // Context
                 android.R.layout.simple_dropdown_item_1line, // Layout
                 manufacturers // Listadapter
         )
 
         // Set the AutoCompleteTextView adapter
-        ac_pipe_manufacturer.setAdapter(adapter)
+        ac_pipe_manufacturer.setAdapter(adapter_manufacturer)
 
         // Auto complete threshold
         // The minimum number of characters to type to show the drop down
         ac_pipe_manufacturer.threshold = 1
+
+        val adapter_manufactuer_typ = ArrayAdapter<String>(
+                this, // Context
+                android.R.layout.simple_dropdown_item_1line, // Layout
+                manufacturer_typ // Listadapter
+        )
+        ac_pipe__typ_manufacturer.setAdapter(adapter_manufactuer_typ)
+        ac_pipe__typ_manufacturer.threshold = 1
+
+
+        val adapter_typ = ArrayAdapter<String>(
+                this, // Context
+                android.R.layout.simple_dropdown_item_1line, // Layout
+                pipe_typ // Listadapter
+        )
+        ac_pipetyp.setAdapter(adapter_typ)
+        ac_pipetyp.threshold = 1
+
+        val adapter_dn = ArrayAdapter<Int>(
+                this, // Context
+                android.R.layout.simple_dropdown_item_1line, // Layout
+                dn
+        )
+        ac_pipe_dn.setAdapter(adapter_dn)
+        ac_pipe_dn.threshold = 1
 
 
 
