@@ -51,7 +51,7 @@ class DataBaseHandler(var context: Context) : SQLiteOpenHelper(context,Constants
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    fun insertDataPipes(pipes : Pipes){
+    fun InsertDataPipes(pipes : Pipes){
         val db = this.writableDatabase
         var cv = ContentValues()
         cv.put(Constants_DB_Pipes.COL_PIPETYP,pipes.typ)
@@ -67,6 +67,34 @@ class DataBaseHandler(var context: Context) : SQLiteOpenHelper(context,Constants
             Toast.makeText(context,"Failed",Toast.LENGTH_SHORT).show()
         else
             Toast.makeText(context,"Success",Toast.LENGTH_SHORT).show()
+    }
+
+    fun UpdateDataPipes(pipes : Pipes, id : Int){
+        val db = this.writableDatabase
+        var cv = ContentValues()
+        cv.put(Constants_DB_Pipes.COL_PIPETYP,pipes.typ)
+        cv.put(Constants_DB_Pipes.COL_PIPEMANUFACTURER,pipes.manufacturer)
+        cv.put(Constants_DB_Pipes.COL_TYPPIPEMANUFACTURER,pipes.typ_manufacturer)
+        cv.put(Constants_DB_Pipes.COL_PIPE_DO,pipes.diameter_out)
+        cv.put(Constants_DB_Pipes.COL_PIPE_DI, pipes.diameter_in)
+        cv.put(Constants_DB_Pipes.COL_PIPE_K, pipes.k)
+        cv.put(Constants_DB_Pipes.COL_PIPE_DN,pipes.dn)
+        cv.put(Constants_DB_Pipes.COL_USER_ENTRY,pipes.UserEntry)
+        var result = db.update(Constants_DB_Pipes.TABLE_NAME_PIPES, cv, Constants_DB_Pipes.COL_ID + " = " + id.toString(), null)
+        if(result >=1)
+            Toast.makeText(context,"Success",Toast.LENGTH_SHORT).show()
+        else
+            Toast.makeText(context,"Failed",Toast.LENGTH_SHORT).show()
+    }
+
+    fun DeleteDataPipes(id:Int)
+    {
+        val db = this.writableDatabase
+        var result = db.delete(Constants_DB_Pipes.TABLE_NAME_PIPES, Constants_DB_Pipes.COL_ID + " = " + id.toString(), null)
+        if(result >=1)
+            Toast.makeText(context,"Success",Toast.LENGTH_SHORT).show()
+        else
+            Toast.makeText(context,"Failed",Toast.LENGTH_SHORT).show()
     }
 
     fun Get_All_Columns_Pipes(query : String) : MutableList<Pipes>{

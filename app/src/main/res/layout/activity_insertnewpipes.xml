@@ -218,7 +218,7 @@
         </LinearLayout>
 
         <Button
-            android:id="@+id/btn_insert"
+            android:id="@+id/btn_insert_update"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"

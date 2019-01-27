@@ -1,5 +1,6 @@
 package com.example.theblackraven.tga_tools
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
@@ -114,9 +115,19 @@ class ListPipesActivity : AppCompatActivity() {
             }
 
             this.ivEdit.setOnClickListener{
-                Toast.makeText(this.context, this.context.toString() , Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this.context, this.context.toString() , Toast.LENGTH_SHORT).show()
                 val intent = Intent(this.context, InsertNewPipesActivity::class.java)
                 intent.putExtra(KEY_WORDS_INSERTNEWPIPESACTIVITY.DB_ID, db_id.toString())
+                this.context.startActivity(intent)
+            }
+
+            this.ivDelete.setOnClickListener{
+                var db = DataBaseHandler(context)
+                db.DeleteDataPipes(db_id)
+                (context as Activity).finish()
+
+                //Reload activity to refresh Data
+                val intent = Intent(this.context, ListPipesActivity::class.java)
                 this.context.startActivity(intent)
             }
         }
