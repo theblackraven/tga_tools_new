@@ -101,7 +101,7 @@ class DataBaseHandler(var context: Context) : SQLiteOpenHelper(context,Constants
 
         var list = mutableListOf<String>()
         val db = this.readableDatabase
-        val query = "SELECT DISTINCT  " + Column +" from " + DB
+        val query = "SELECT " + Column +" from " + DB
         val result = db.rawQuery(query,null)
 
         if(result.moveToFirst()){

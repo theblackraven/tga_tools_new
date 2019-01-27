@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.theblackraven.tga_tools.InsertNewPipesActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/pipetyp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pipetyp"
+                android:layout_margin="10dp"
+                android:padding="10dp" />
+
+
+            <AutoCompleteTextView
+                android:id="@+id/ac_pipetyp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dip"
+                android:layout_marginTop="20dip"
+                android:layout_marginRight="8dip"
+                android:text="" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/pipe_manufacturer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pipe_manufacturer"
+                android:layout_margin="10dp"
+                android:padding="10dp" />
+
+
+            <AutoCompleteTextView
+                android:id="@+id/ac_pipe_manufacturer"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dip"
+                android:layout_marginTop="20dip"
+                android:layout_marginRight="8dip"
+                android:text="" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/pipe_typ_manufacturer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pipe_typ_manufacturer"
+                android:layout_margin="10dp"
+                android:padding="10dp" />
+
+
+            <AutoCompleteTextView
+                android:id="@+id/ac_pipe__typ_manufacturer"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dip"
+                android:layout_marginTop="20dip"
+                android:layout_marginRight="8dip"
+                android:text="" />
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/pipe_dn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pipe_dn"
+                android:layout_margin="10dp"
+                android:padding="10dp" />
+
+            <AutoCompleteTextView
+                android:id="@+id/ac_pipe_dn"
+                android:layout_width="40sp"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dip"
+                android:layout_marginTop="20dip"
+                android:layout_marginRight="8dip"
+                android:prompt="@string/spinner_pipe_dn"
+                android:inputType="number"
+                android:spinnerMode="dropdown" />
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/pipe_di"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:padding="10dp"
+                android:text="@string/pipe_di" />
+
+            <EditText
+                android:id="@+id/etv_di"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:inputType="numberDecimal"
+                android:padding="10dp" />
+
+            <Spinner
+                android:id="@+id/spinner_unit_pipe_di"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dip"
+                android:layout_marginTop="20dip"
+                android:layout_marginRight="8dip"
+                android:prompt="@string/spinner_unit_pipe_di"
+                android:spinnerMode="dropdown" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/pipe_do"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:padding="10dp"
+                android:text="@string/pipe_do" />
+
+            <EditText
+                android:id="@+id/etv_do"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:inputType="numberDecimal"
+                android:padding="10dp" />
+
+            <Spinner
+                android:id="@+id/spinner_unit_pipe_do"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dip"
+                android:layout_marginTop="20dip"
+                android:layout_marginRight="8dip"
+                android:prompt="@string/spinner_unit_pipe_do"
+                android:spinnerMode="dropdown" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/pipe_k"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:padding="10dp"
+                android:text="@string/pipe_k" />
+
+            <EditText
+                android:id="@+id/etv_k"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:inputType="numberDecimal"
+                android:padding="10dp" />
+
+            <Spinner
+                android:id="@+id/spinner_unit_pipe_k"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dip"
+                android:layout_marginTop="20dip"
+                android:layout_marginRight="8dip"
+                android:prompt="@string/spinner_unit_pipe_k"
+                android:spinnerMode="dropdown" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_insert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:padding="10dp"
+            android:text="Insert" />
+
+    </LinearLayout>
+
+
+
+
+
+</LinearLayout>
