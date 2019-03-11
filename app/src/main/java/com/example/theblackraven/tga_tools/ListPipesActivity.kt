@@ -31,7 +31,7 @@ class ListPipesActivity : AppCompatActivity() {
         // Liste für die Rohre
         val ListPipes = mutableListOf<Pipes>()
             //var data = db.Get_All_Columns_Pipes("Select * from " + Constants_DB_Pipes.TABLE_NAME_PIPES +  " WHERE " + Constants_DB_Pipes.COL_PIPEMANUFACTURER + " LIKE 'Geberit'" )
-            var data = db.Get_All_Columns_Pipes("Select * from " + Constants_DB_Pipes.TABLE_NAME_PIPES )
+            var data = db.Get_All_Columns_Pipes()
             for (i in 0..(data.size - 1)) {
                 ListPipes.add(data.get(i))
             }
@@ -109,8 +109,8 @@ class ListPipesActivity : AppCompatActivity() {
 
         //  if you target API 26, you should change to:
        init {
-          this.tvTitle = view?.findViewById<TextView>(R.id.tvTitle) as TextView
-          this.tvContent = view?.findViewById<TextView>(R.id.tvContent) as TextView
+            this.tvTitle = view?.findViewById<TextView>(R.id.tvTitle) as TextView
+            this.tvContent = view?.findViewById<TextView>(R.id.tvContent) as TextView
             this.ivDelete =   view?.findViewById<ImageView>(R.id.ivDelete) as ImageView
             this.ivEdit =   view?.findViewById<ImageView>(R.id.ivEdit) as ImageView
             this.ivDelete.setOnClickListener{

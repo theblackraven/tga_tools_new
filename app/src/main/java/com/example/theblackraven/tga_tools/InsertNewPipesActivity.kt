@@ -46,7 +46,7 @@ class InsertNewPipesActivity : AppCompatActivity() {
 
         if (db_id != null) //load data from pipe and insert values
         {
-            var data =  db.Get_All_Columns_Pipes("Select * from " + Constants_DB_Pipes.TABLE_NAME_PIPES +  " WHERE " + Constants_DB_Pipes.COL_ID + " == " + db_id )
+            var data =  db.Get_All_Columns_Pipes(Constants_DB.COL_ID + " == " + db_id )
             pipe = data.get(0)
             ac_pipe_manufacturer.setText(pipe.manufacturer)
             ac_pipe__typ_manufacturer.setText(pipe.typ_manufacturer)
@@ -56,6 +56,7 @@ class InsertNewPipesActivity : AppCompatActivity() {
             etv_do.setText(pipe.diameter_out.toString())
             etv_k.setText(pipe.k.toString())
             btn_insert_update.setText("Update")
+
 
         }
 
@@ -147,6 +148,7 @@ class InsertNewPipesActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(context,"Please Fill All Data's",Toast.LENGTH_SHORT).show()
             }
+            finish()
         }
 
 
