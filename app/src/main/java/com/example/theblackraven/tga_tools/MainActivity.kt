@@ -32,31 +32,37 @@ class MainActivity() : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val bundle=intent.extras
-        var parentId : Int = 0
-        if(bundle!=null) {
-            parentId = bundle.getString(KEY_WORDS_INSERTNEWPIPESACTIVITY.DB_ID).toInt()
-        }
 
         val context = this
         var ListApps = mutableListOf<Apps>()
         AppsViewModel1 = ViewModelProviders.of(this).get(AppsViewModel::class.java)
-        AppsViewModel1.init(parentId)
+        AppsViewModel1.init()
+
+        var adapter = AppAdapter(this, ListApps)
+        lvApps.adapter = adapter
+
+
         AppsViewModel1.Apps.observe(this, Observer { Apps ->
             if (Apps != null) {
                 ListApps = Apps.toMutableList()
+                adapter.update(ListApps)
             }
-            lvApps.adapter = AppAdapter(this, ListApps)
 
-            lvApps.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, position, id ->
-                goto_app(getId_of_ListView(position,ListApps), context)
-            }
             })
+
+
+        lvApps.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, position, id ->
+            AppsViewModel1.update(getLevel_of_Item(position,ListApps)+1)
+            goto_app(getId_of_ListView(position,ListApps), context)
         }
+
+        }
+
 
     inner class AppAdapter : BaseAdapter {         //BaseAdapter implements ListAdapter, SpinnerAdapter;
         // declare an explicit supertype, we place the type after a colon in the class header (: BaseAdapter)
         private var notesList = mutableListOf<Apps>()
-        private var context: Context            //? ==> Context is nullable
+        private var context: Context            // ==> Context is nullable
 
         constructor(context: Context, notesList : MutableList<Apps>) : super() {       //secondary constructor, super is needed
             this.notesList = notesList
@@ -70,7 +76,7 @@ class MainActivity() : AppCompatActivity() {
 
             if (convertView == null) {      //only inflate, when view isn't inflated yet; See  https://stackoverflow.com/questions/10560624/what-is-the-purpose-of-convertview-in-listview-adapter
                 view = layoutInflater.inflate(R.layout.apps_layout, parent, false)
-                vh = MainActivity.ViewHolder(view, position, this.context)
+                vh = MainActivity.ViewHolder(view, this.context)
                 view.tag = vh
             } else {
                 view = convertView
@@ -94,8 +100,15 @@ class MainActivity() : AppCompatActivity() {
         override fun getCount(): Int {
             return notesList.size
         }
+
+        fun update(Apps : MutableList<Apps>)
+        {
+            notesList = Apps
+            notifyDataSetChanged()
+        }
+
     }
-    private class ViewHolder(view: View?, position: Int, context: Context) {
+    private class ViewHolder(view: View?, context: Context) {
         val app_name: TextView
         val counter: TextView
         val ivApp: ImageView
@@ -112,7 +125,6 @@ class MainActivity() : AppCompatActivity() {
 
 class AppsViewModel(application: Application) : AndroidViewModel(application) {
 
-    private var parent_id : Int = 0
     private var parentJob = Job()
     // By default all the coroutines launched in this scope should be using the Main dispatcher
     private val coroutineContext: CoroutineContext
@@ -120,15 +132,22 @@ class AppsViewModel(application: Application) : AndroidViewModel(application) {
     private val scope = CoroutineScope(coroutineContext)
     private val context = application
 
+    val db = TGA_RoomDatabase.getDatabase(context)
+    val DaoApps = db.DaoApps()
+
     val AppsRepository = AppsRepository(application)
 
 
-    var Apps = AppsRepository.getAllApps(this.parent_id)
+    var Apps = AppsRepository.getAllApps()
 
-    fun init(parent_id_ : Int)  = scope.launch(Dispatchers.IO){
-          parent_id = parent_id_
+    fun update(level : Int)
+    {
+        DaoApps.activate(level)
+    }
+
+    fun init()  = scope.launch(Dispatchers.IO){
           CreateAppList(context)
-          Apps = AppsRepository.getAllApps(parent_id_)
+          Apps = AppsRepository.getAllApps()
     }
 
     override fun onCleared() {
@@ -143,6 +162,11 @@ class AppsViewModel(application: Application) : AndroidViewModel(application) {
 private fun getId_of_ListView(position:Int, ListofApps:List<Apps>) : Int
 {
     return (ListofApps.get(position).id)
+}
+
+private fun getLevel_of_Item(position:Int, ListofApps:List<Apps>) : Int
+{
+    return (ListofApps.get(position).level)
 }
 
 

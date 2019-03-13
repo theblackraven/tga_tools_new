@@ -13,9 +13,10 @@ class AppsRepository(private val context: Context) {
     // Observed LiveData will notify the observer when the data has changed.
     val db = TGA_RoomDatabase.getDatabase(context)
     val DaoApps = db.DaoApps()
+    val Apps = DaoApps.getAllApps_LiveData()
 
-    fun getAllApps(parent_id : Int) : LiveData<List<Apps>>  {
-        return DaoApps.getAllApps_LiveData(parent_id)
+    fun getAllApps() : LiveData<List<Apps>>  {
+        return Apps
     }
 
     // You must call this on a non-UI thread or your app will crash. So we're making this a

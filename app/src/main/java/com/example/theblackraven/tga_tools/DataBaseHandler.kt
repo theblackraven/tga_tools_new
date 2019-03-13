@@ -233,14 +233,20 @@ interface DaoApps {
     @Query("SELECT * from table_apps ORDER BY app_name ASC")
     fun getAllApps(): List<Apps>
 
-    @Query("SELECT * from table_apps WHERE parent_id = :parent_id ORDER BY app_name ASC")
-    fun getAllApps_LiveData(parent_id : Int): LiveData<List<Apps>>
+    @Query("SELECT * from table_apps WHERE activated = 1 ORDER BY id, level, app_name ASC")
+    fun getAllApps_LiveData(): LiveData<List<Apps>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun InsertDataApps(Apps: Apps)
 
     @Query("UPDATE table_apps SET used_count = used_count + 1 WHERE id = :id")
-    fun used_count(id:Int);
+    fun used_count(id:Int)
+
+    @Query("UPDATE table_apps SET activated = not activated WHERE level = :level")
+    fun activate(level: Int)
+
+    @Update()
+    fun update(Apps: Apps)
 }
 
 @Database(entities = [Apps::class], version = 1)
