@@ -1,10 +1,14 @@
 package com.example.theblackraven.tga_tools
 
+import android.app.Activity
 import android.arch.persistence.room.ColumnInfo
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.PrimaryKey
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.support.annotation.WorkerThread
+import android.support.v4.content.ContextCompat.startActivity
 
 class Constants_Apps{
 
@@ -32,22 +36,7 @@ class Apps{
     }
 }
 
-fun CreateAppList(context: Context) {
 
-    val ListApps = mutableListOf<Apps>()
-    val db = TGA_RoomDatabase.getDatabase(context)
-    val DaoApps = db.DaoApps()
-
-    //first category
-    ListApps.add(Apps("pipe_apps", Constants_Apps.PIPE))
-    ListApps.add(Apps("storage_apps",Constants_Apps.STORAGE))
-
-        for (i in 0..(ListApps.size - 1)) {
-            DaoApps.InsertDataApps(ListApps.get(i))
-        }
-
-
-}
 
 fun getImageId(primaryId : Int) : Int{
     if (primaryId == Constants_Apps.PIPE){
@@ -61,4 +50,36 @@ fun getImageId(primaryId : Int) : Int{
         return R.drawable.ic_delete
     }
 
+}
+
+fun goto_app(id:Int, context:Context)
+{
+
+    TGA_RoomDatabase.getDatabase(context).DaoApps().used_count(id)// Count everytime app is started
+
+    if (id == 0)
+    {
+        context.startActivity(Intent(context, InsertNewPipesActivity::class.java))
+    }
+    else if (id == 1)
+    {
+        (context as Activity).finish()
+        context.startActivity(Intent(context, MainActivity::class.java).putExtra(KEY_WORDS_INSERTNEWPIPESACTIVITY.DB_ID, id.toString()))
+    }
+
+}
+
+@WorkerThread   // Start inn Worker Thread
+fun CreateAppList(context:Context){
+    val db = TGA_RoomDatabase.getDatabase(context)
+    val DaoApps = db.DaoApps()
+    val ListApps = mutableListOf<Apps>()
+    //first category
+    ListApps.add(Apps("pipe_apps", Constants_Apps.PIPE, 0))
+    ListApps.add(Apps("storage_apps",Constants_Apps.STORAGE, 0))
+    ListApps.add(Apps("Ebene 2", 4, Constants_Apps.STORAGE ))
+
+    for (i in 0..(ListApps.size - 1)) {
+        DaoApps.InsertDataApps(ListApps.get(i))
+    }
 }

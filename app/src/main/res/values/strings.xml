@@ -14,4 +14,6 @@
     <string name="spinner_unit_pipe_di">"Einheit"</string>
     <string name="spinner_unit_pipe_do">"Einheit"</string>
     <string name="spinner_unit_pipe_k">"Einheit"</string>
+    <string name="pipe_apps">"Rohrberechnungen"</string>
+    <string name="tank_apps">"Speicherberechnungen"</string>
 </resources>

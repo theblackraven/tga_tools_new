@@ -1,6 +1,7 @@
 package com.example.theblackraven.tga_tools
 
 import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.MutableLiveData
 import android.arch.persistence.room.*
 import android.content.ContentValues
 import android.content.Context
@@ -231,6 +232,9 @@ class DataBaseHandler(var context: Context) : SQLiteOpenHelper(context,Constants
 interface DaoApps {
     @Query("SELECT * from table_apps ORDER BY app_name ASC")
     fun getAllApps(): List<Apps>
+
+    @Query("SELECT * from table_apps WHERE parent_id = :parent_id ORDER BY app_name ASC")
+    fun getAllApps_LiveData(parent_id : Int): LiveData<List<Apps>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun InsertDataApps(Apps: Apps)

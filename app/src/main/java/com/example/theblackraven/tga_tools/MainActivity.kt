@@ -2,6 +2,8 @@ package com.example.theblackraven.tga_tools
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.Application
+import android.arch.lifecycle.*
 import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Drawable
@@ -13,68 +15,42 @@ import android.view.ViewGroup
 import android.widget.*
 import kotlinx.android.synthetic.main.activity_listpipes.*
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.apps_layout.*
-import org.jetbrains.anko.doAsync
-
-class MainActivity : AppCompatActivity() {
-
-    //Funktion, um ListPipesActivity  zu starten
-    fun goto_ListPipesActivity()
-    {
-        startActivity(Intent(this@MainActivity, ListPipesActivity::class.java))
-    }
-
-    //Funktion, um ListPipesActivity  zu starten
-    fun goto_InsertNewPipesActivity()
-    {
-        startActivity(Intent(this@MainActivity, InsertNewPipesActivity::class.java))
-    }
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 
-    fun goto_app(id:Int, context:Context)
-    {
-
-        TGA_RoomDatabase.getDatabase(context).DaoApps().used_count(id)// Count everytime app is started
-
-        if (id == 1)
-        {
-            startActivity(Intent(this@MainActivity, ListPipesActivity::class.java))
-        }
-
-    }
+class MainActivity() : AppCompatActivity() {
 
 
+    private lateinit  var AppsViewModel1: AppsViewModel
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+        override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val bundle=intent.extras
+        var parentId : Int = 0
+        if(bundle!=null) {
+            parentId = bundle.getString(KEY_WORDS_INSERTNEWPIPESACTIVITY.DB_ID).toInt()
+        }
+
         val context = this
-        doAsync {
-            CreateAppList(context)
-        }
-
-        val db = TGA_RoomDatabase.getDatabase(context)
-        val DaoApps = db.DaoApps()
-        val ListApps = mutableListOf<Apps>()
-
-       //Get applist
-        var data = DaoApps.getAllApps()
-        if (data != null) {
-            for (i in 0..(data.size - 1)) {
-                ListApps.add(data.get(i))
+        var ListApps = mutableListOf<Apps>()
+        AppsViewModel1 = ViewModelProviders.of(this).get(AppsViewModel::class.java)
+        AppsViewModel1.init(parentId)
+        AppsViewModel1.Apps.observe(this, Observer { Apps ->
+            if (Apps != null) {
+                ListApps = Apps.toMutableList()
             }
-        }
+            lvApps.adapter = AppAdapter(this, ListApps)
 
-
-        lvApps.adapter = AppAdapter(this, ListApps)
-
-        lvApps.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, position, id ->
-            val  tvCount = view.findViewById<TextView>(R.id.tvapp_id).text.toString().toInt()
-            goto_app(tvCount, context)
-        }
-
-
+            lvApps.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, position, id ->
+                goto_app(getId_of_ListView(position,ListApps), context)
+            }
+            })
         }
 
     inner class AppAdapter : BaseAdapter {         //BaseAdapter implements ListAdapter, SpinnerAdapter;
@@ -104,8 +80,6 @@ class MainActivity : AppCompatActivity() {
             vh.app_name.text = notesList[position].app_name
             vh.counter.text = notesList[position].used_count.toString()
             vh.ivApp.setImageResource(getImageId(notesList[position].id))
-            vh.app_id.text = notesList[position].id.toString()
-
             return view
         }
 
@@ -125,16 +99,51 @@ class MainActivity : AppCompatActivity() {
         val app_name: TextView
         val counter: TextView
         val ivApp: ImageView
-        val app_id : TextView
         var context : Context = context
 
 
         init {
             this.app_name = view?.findViewById<TextView>(R.id.tvapp_name) as TextView
-            this.app_id = view?.findViewById<TextView>(R.id.tvapp_id) as TextView
             this.counter = view?.findViewById<TextView>(R.id.tvCounter) as TextView
             this.ivApp = view?.findViewById<ImageView>(R.id.ivApp) as ImageView
         }
     }
 }
+
+class AppsViewModel(application: Application) : AndroidViewModel(application) {
+
+    private var parent_id : Int = 0
+    private var parentJob = Job()
+    // By default all the coroutines launched in this scope should be using the Main dispatcher
+    private val coroutineContext: CoroutineContext
+        get() = parentJob + Dispatchers.Main
+    private val scope = CoroutineScope(coroutineContext)
+    private val context = application
+
+    val AppsRepository = AppsRepository(application)
+
+
+    var Apps = AppsRepository.getAllApps(this.parent_id)
+
+    fun init(parent_id_ : Int)  = scope.launch(Dispatchers.IO){
+          parent_id = parent_id_
+          CreateAppList(context)
+          Apps = AppsRepository.getAllApps(parent_id_)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        parentJob.cancel()
+    }
+
+
+}
+
+//Return Id of Database for the Clicked Element of the ListView
+private fun getId_of_ListView(position:Int, ListofApps:List<Apps>) : Int
+{
+    return (ListofApps.get(position).id)
+}
+
+
 
