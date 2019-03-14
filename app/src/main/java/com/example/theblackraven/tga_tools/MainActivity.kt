@@ -1,25 +1,27 @@
 package com.example.theblackraven.tga_tools
 
-import android.app.Activity
-import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.*
 import android.content.Context
-import android.content.Intent
-import android.graphics.drawable.Drawable
+import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import kotlinx.android.synthetic.main.activity_listpipes.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
+import android.widget.RelativeLayout
+import android.util.TypedValue
+import android.util.DisplayMetrics
+
+
+
+
 
 
 class MainActivity() : AppCompatActivity() {
@@ -52,8 +54,8 @@ class MainActivity() : AppCompatActivity() {
 
 
         lvApps.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, position, id ->
-            AppsViewModel1.update(getLevel_of_Item(position,ListApps)+1)
-            goto_app(getId_of_ListView(position,ListApps), context)
+            adapter.activate(position)
+            adapter.open_app(position)
         }
 
         }
@@ -83,10 +85,44 @@ class MainActivity() : AppCompatActivity() {
                 vh = view.tag as MainActivity.ViewHolder
             }
 
-            vh.app_name.text = notesList[position].app_name
+            vh.app_name.text = getStringResource(notesList[position].app_name)
+            val level = notesList[position].parent_ids.split("ID").size - 1
+            try {
+                val lp = LinearLayout.LayoutParams(vh.app_name.getLayoutParams())
+                lp.setMargins(convertDpToPx(level * 15, vh.app_name.getResources().getDisplayMetrics()),lp.topMargin, lp.rightMargin, lp.bottomMargin)
+                if (!notesList[position].runable) {
+                    if (level == 0) {
+                        vh.app_name.setBackgroundColor(Color.parseColor("#aaaaaa"))
+                        vh.counter.setBackgroundColor(Color.parseColor("#aaaaaa"))
+                        vh.ivApp.setBackgroundColor(Color.parseColor("#aaaaaa"))
+                    }
+                    else if (level == 1) {
+                        vh.app_name.setBackgroundColor(Color.parseColor("#00bbbb"))
+                        vh.counter.setBackgroundColor(Color.parseColor("#00bbbb"))
+                        vh.ivApp.setBackgroundColor(Color.parseColor("#00bbbb"))
+                    }
+                }
+                else{
+                    vh.app_name.setBackgroundColor(Color.parseColor("#ffffff"))
+                    vh.counter.setBackgroundColor(Color.parseColor("#ffffff"))
+                    vh.ivApp.setBackgroundColor(Color.parseColor("#ffffff"))
+                }
+
+                vh.app_name.setLayoutParams(lp)
+                vh.counter.setLayoutParams(lp)
+            }
+            catch (e: Throwable){
+
+            }
             vh.counter.text = notesList[position].used_count.toString()
-            vh.ivApp.setImageResource(getImageId(notesList[position].id))
+            vh.ivApp.setImageResource(getImageId(notesList[position].app_name))
+
             return view
+        }
+
+        private fun convertDpToPx(dp: Int, displayMetrics: DisplayMetrics): Int {
+            val pixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), displayMetrics)
+            return Math.round(pixels)
         }
 
         override fun getItem(position: Int): Any {
@@ -105,6 +141,39 @@ class MainActivity() : AppCompatActivity() {
         {
             notesList = Apps
             notifyDataSetChanged()
+        }
+
+        fun activate(position : Int)
+        {
+            val db = TGA_RoomDatabase.getDatabase(context)
+            val DaoApps = db.DaoApps()
+            if (notesList[position].runable == false && notesList[position].activated == false ) {
+                DaoApps.visible(notesList[position].id.toString(), notesList[position].id)
+                DaoApps.acitvate(notesList[position].id, true)
+            }
+            else if (notesList[position].runable == false && notesList[position].activated == true ) {
+                DaoApps.invisible(notesList[position].id.toString(), notesList[position].id)
+                DaoApps.acitvate(notesList[position].id, false)
+            }
+        }
+
+        fun open_app(position: Int)
+        {
+            apps_open_app(notesList[position].app_name, context)
+        }
+
+        //Get String Reosource
+        private fun getStringResource(string:String) : String
+        {
+            var stringResource : String = string
+            try {
+               stringResource = getResources().getString(getResources().getIdentifier(string, "string", getPackageName()))
+                return stringResource
+            }
+            catch (e: Throwable ) {
+                return string
+            }
+
         }
 
     }
@@ -132,18 +201,10 @@ class AppsViewModel(application: Application) : AndroidViewModel(application) {
     private val scope = CoroutineScope(coroutineContext)
     private val context = application
 
-    val db = TGA_RoomDatabase.getDatabase(context)
-    val DaoApps = db.DaoApps()
-
     val AppsRepository = AppsRepository(application)
 
 
     var Apps = AppsRepository.getAllApps()
-
-    fun update(level : Int)
-    {
-        DaoApps.activate(level)
-    }
 
     fun init()  = scope.launch(Dispatchers.IO){
           CreateAppList(context)
@@ -158,16 +219,7 @@ class AppsViewModel(application: Application) : AndroidViewModel(application) {
 
 }
 
-//Return Id of Database for the Clicked Element of the ListView
-private fun getId_of_ListView(position:Int, ListofApps:List<Apps>) : Int
-{
-    return (ListofApps.get(position).id)
-}
 
-private fun getLevel_of_Item(position:Int, ListofApps:List<Apps>) : Int
-{
-    return (ListofApps.get(position).level)
-}
 
 
 

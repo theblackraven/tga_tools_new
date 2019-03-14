@@ -233,23 +233,29 @@ interface DaoApps {
     @Query("SELECT * from table_apps ORDER BY app_name ASC")
     fun getAllApps(): List<Apps>
 
-    @Query("SELECT * from table_apps WHERE activated = 1 ORDER BY id, level, app_name ASC")
+    @Query("SELECT * from table_apps WHERE visible = 1 ORDER BY id, used_count ASC")
     fun getAllApps_LiveData(): LiveData<List<Apps>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun InsertDataApps(Apps: Apps)
 
-    @Query("UPDATE table_apps SET used_count = used_count + 1 WHERE id = :id")
-    fun used_count(id:Int)
+    @Query("UPDATE table_apps SET used_count = used_count + 1 WHERE app_name = :app_name")
+    fun used_count(app_name:String)
 
-    @Query("UPDATE table_apps SET activated = not activated WHERE level = :level")
-    fun activate(level: Int)
+    @Query("UPDATE table_apps SET visible = 0, activated = 0 WHERE parent_ids LIKE  '%ID' || :s_id || '%' AND not id = :n_id" )
+    fun invisible(s_id: String, n_id : Int)
 
-    @Update()
-    fun update(Apps: Apps)
+    @Query("UPDATE table_apps SET visible = 1 WHERE parent_ids LIKE '%' || :s_id AND not id = :n_id" )
+    fun visible(s_id: String, n_id : Int)
+
+    @Query("UPDATE table_apps SET activated = :activate WHERE id = :id" )
+    fun acitvate(id: Int, activate : Boolean)
+
+    @Query("UPDATE table_apps SET id = :id , parent_ids = :parent_ids WHERE app_name = :app_name")
+    fun update(app_name : String, id : Int, parent_ids : String)
 }
 
-@Database(entities = [Apps::class], version = 1)
+@Database(entities = [Apps::class], version = 2)
 abstract class TGA_RoomDatabase : RoomDatabase() {
 
     abstract fun DaoApps(): DaoApps

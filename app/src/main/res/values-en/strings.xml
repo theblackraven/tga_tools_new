@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TGA-Tools</string>
     <string name="pipetyp">pipe typ</string>
@@ -19,11 +20,6 @@
 
     <!--Apps-->
     <string name="Apps_Pipes">pipes</string>
-        <string name="Apps_Pipes_Database">Database</string>
-            <string name="Apps_Pipes_Show">show pipes</string>
-            <string name="Apps_Pipes_Add">add pipes</string>
-
     <string name="Apps_Storage">storage</string>
-        <string name="Apps_Storage_capacity">storage</string>
 
 </resources>
