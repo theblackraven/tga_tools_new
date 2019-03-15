@@ -145,7 +145,7 @@ class MainActivity() : AppCompatActivity() {
 
         fun activate(position : Int)
         {
-            val db = TGA_RoomDatabase.getDatabase(context)
+            val db = TGA_Apps_Database.getDatabase(context)
             val DaoApps = db.DaoApps()
             if (notesList[position].runable == false && notesList[position].activated == false ) {
                 DaoApps.visible(notesList[position].id.toString(), notesList[position].id)

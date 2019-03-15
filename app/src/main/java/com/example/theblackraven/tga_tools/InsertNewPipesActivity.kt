@@ -11,6 +11,7 @@ import android.widget.ListAdapter
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import kotlinx.android.synthetic.main.activity_insertnewpipes.*
+import java.security.MessageDigest
 
 
 class KEY_WORDS_INSERTNEWPIPESACTIVITY{
@@ -28,7 +29,6 @@ class InsertNewPipesActivity : AppCompatActivity() {
 
 
         val context = this
-        var db = DataBaseHandler(context)
 
         val bundle=intent.extras
         var db_id : String? = null
@@ -46,8 +46,8 @@ class InsertNewPipesActivity : AppCompatActivity() {
 
         if (db_id != null) //load data from pipe and insert values
         {
-            var data =  db.Get_All_Columns_Pipes(Constants_DB.COL_ID + " == " + db_id )
-            pipe = data.get(0)
+            val DaoPipes = TGA_RoomDatabase.getDatabase(context).DaoPipes()
+            pipe = DaoPipes.getPipe(db_id)
             ac_pipe_manufacturer.setText(pipe.manufacturer)
             ac_pipe__typ_manufacturer.setText(pipe.typ_manufacturer)
             ac_pipetyp.setText(pipe.typ)
@@ -56,26 +56,25 @@ class InsertNewPipesActivity : AppCompatActivity() {
             etv_do.setText(pipe.diameter_out.toString())
             etv_k.setText(pipe.k.toString())
             btn_insert_update.setText("Update")
-
-
         }
 
 
+        val DaoPipes = TGA_RoomDatabase.getDatabase(context).DaoPipes()
         //get existing manufactuer
 
-        var data_manufactures = db.Get_DB_Column_String_DISTINCT(Constants_DB_Pipes.TABLE_NAME_PIPES, Constants_DB_Pipes.COL_PIPEMANUFACTURER)
+        var data_manufactures = DaoPipes.getDestinctManufactuer()
         for (i in 0..(data_manufactures.size - 1)) {
-            manufacturers.add(data_manufactures.get(i))
+                manufacturers.add(data_manufactures[i])
         }
 
         //get existing pipe_typ
-        var data_typ = db.Get_DB_Column_String_DISTINCT(Constants_DB_Pipes.TABLE_NAME_PIPES, Constants_DB_Pipes.COL_PIPETYP)
+        var data_typ = DaoPipes.getDestinctTyp()
         for (i in 0..(data_typ.size - 1)) {
             pipe_typ.add(data_typ.get(i))
         }
 
         //get existing typ of manufactuer
-        var data_manufacturer_typ = db.Get_DB_Column_String_DISTINCT(Constants_DB_Pipes.TABLE_NAME_PIPES, Constants_DB_Pipes.COL_TYPPIPEMANUFACTURER)
+        var data_manufacturer_typ = DaoPipes.getDestinctTypManufacturer()
         for (i in 0..(data_manufacturer_typ.size - 1)) {
             manufacturer_typ.add(data_manufacturer_typ.get(i))
         }
@@ -139,11 +138,16 @@ class InsertNewPipesActivity : AppCompatActivity() {
 
                     var pipe = Pipes(ac_pipetyp.text.toString(), ac_pipe_manufacturer.text.toString(), ac_pipe__typ_manufacturer.text.toString(), etv_do.text.toString().toFloat(), etv_di.text.toString().toFloat(), etv_k.text.toString().toFloat(), ac_pipe_dn.text.toString().toInt())
                 if (db_id == null) { //add new pipe
-                    db.InsertDataPipes(pipe)
+                    pipe.id = toMD5Hash(pipe.toString())
+                    val DaoPipes = TGA_RoomDatabase.getDatabase(context).DaoPipes()
+                    DaoPipes.InsertPipes(pipe)
+
                 }
                 else
                 {
-                    db.UpdateDataPipes(pipe, db_id.toInt())
+                    pipe.id = db_id
+                    val DaoPipes = TGA_RoomDatabase.getDatabase(context).DaoPipes()
+                    DaoPipes.Update(pipe)
                 }
             } else {
                 Toast.makeText(context,"Please Fill All Data's",Toast.LENGTH_SHORT).show()
@@ -153,4 +157,38 @@ class InsertNewPipesActivity : AppCompatActivity() {
 
 
         }
+
+    private fun byteArrayToHexString( array: Array<Byte> ): String {
+
+        var result = StringBuilder(array.size * 2)
+
+        for ( byte in array ) {
+
+            val toAppend =
+                    String.format("%2X", byte).replace(" ", "0") // hexadecimal
+            result.append(toAppend).append("-")
+        }
+        result.setLength(result.length - 1) // remove last '-'
+
+        return result.toString()
+    }
+
+    private fun toMD5Hash( text: String ): String {
+
+        var result = ""
+
+        try {
+
+            val md5 = MessageDigest.getInstance("MD5")
+            val md5HashBytes = md5.digest(text.toByteArray()).toTypedArray()
+
+            result = byteArrayToHexString(md5HashBytes)
+        }
+        catch ( e: Exception ) {
+
+            result = "error: ${e.message}"
+        }
+
+        return result
+    }
 }

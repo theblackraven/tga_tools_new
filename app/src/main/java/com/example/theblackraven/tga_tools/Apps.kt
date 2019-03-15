@@ -61,7 +61,7 @@ fun getImageId(app_name : String) : Int{
 fun apps_open_app(app_name: String, context:Context)
 {
 
-    TGA_RoomDatabase.getDatabase(context).DaoApps().used_count(app_name)// Count everytime app is started
+    TGA_Apps_Database.getDatabase(context).DaoApps().used_count(app_name)// Count everytime app is started
 
     if (app_name == "Apps_Pipes_Add")
     {
@@ -76,7 +76,7 @@ fun apps_open_app(app_name: String, context:Context)
 
 @WorkerThread   // Start inn Worker Thread
 fun CreateAppList(context:Context){
-    val db = TGA_RoomDatabase.getDatabase(context)
+    val db = TGA_Apps_Database.getDatabase(context)
     val DaoApps = db.DaoApps()
     val ListApps = mutableListOf<Apps>()
     //first category
@@ -86,6 +86,7 @@ fun CreateAppList(context:Context){
     var parent_id_1 : String = ""
 
     ListApps.add(Apps("Apps_Pipes", id, "", false, false, true)); parent_ids = "ID" + id.toString(); parent_id_1 = parent_ids ; id ++
+        ListApps.add(Apps("Apps_Pipes_Add_3", id, parent_ids , false, true)); id++
         ListApps.add(Apps("Apps_Pipes_Database", id, parent_ids , false)); parent_ids = parent_ids + "ID" + id.toString() ; id ++
             ListApps.add(Apps("Apps_Pipes_Show", id, parent_ids, false, true));
             ListApps.add(Apps("Apps_Pipes_Add", id, parent_ids , false, true)); id++

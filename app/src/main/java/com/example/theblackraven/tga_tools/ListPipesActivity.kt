@@ -2,6 +2,10 @@ package com.example.theblackraven.tga_tools
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.app.Application
+import android.arch.lifecycle.AndroidViewModel
+import android.arch.lifecycle.Observer
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
@@ -13,10 +17,16 @@ import android.view.ViewGroup
 import android.widget.*
 import kotlinx.android.synthetic.main.activity_listpipes.*
 import android.content.DialogInterface
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 
 class ListPipesActivity : AppCompatActivity() {
+
+    private lateinit  var PipeViewModel1: PipeViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,20 +34,29 @@ class ListPipesActivity : AppCompatActivity() {
 
 
         val context = this
-        var db = DataBaseHandler(context)
-
-
-
-        // Liste für die Rohre
-        val ListPipes = mutableListOf<Pipes>()
+       // Liste für die Rohre
+        var ListPipes = mutableListOf<Pipes>()
             //var data = db.Get_All_Columns_Pipes("Select * from " + Constants_DB_Pipes.TABLE_NAME_PIPES +  " WHERE " + Constants_DB_Pipes.COL_PIPEMANUFACTURER + " LIKE 'Geberit'" )
+
+            /*
             var data = db.Get_All_Columns_Pipes()
             for (i in 0..(data.size - 1)) {
                 ListPipes.add(data.get(i))
+            }*/
+        PipeViewModel1 = ViewModelProviders.of(this).get(PipeViewModel::class.java)
+        PipeViewModel1.init()
+
+
+        var adapter = PipeAdapter(this, ListPipes)
+        lvPipes.adapter = adapter //Fill Listview
+
+        PipeViewModel1.Pipes.observe(this, Observer { Pipes ->
+            if (Pipes != null) {
+                ListPipes = Pipes.toMutableList()
+                adapter.update(ListPipes)
             }
 
-            var PipeAdapter = PipeAdapter(this, ListPipes)
-            lvPipes.adapter = PipeAdapter //Fill Listview
+        })
             lvPipes.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, position, id ->
                 Toast.makeText(this, "Click on " + ListPipes[position].typ_manufacturer, Toast.LENGTH_SHORT).show()
             }
@@ -74,7 +93,7 @@ class ListPipesActivity : AppCompatActivity() {
 
             vh.tvTitle.text = notesList[position].manufacturer + " " + notesList[position].typ
             vh.tvContent.text = notesList[position].typ_manufacturer + " DN:" + notesList[position].dn
-            vh.db_id = notesList[position].id.toInt()
+            vh.db_id = notesList[position].id
 
             return view
         }
@@ -90,6 +109,12 @@ class ListPipesActivity : AppCompatActivity() {
         override fun getCount(): Int {
             return notesList.size
         }
+
+        fun update(Pipes : MutableList<Pipes>)
+        {
+            notesList = Pipes
+            notifyDataSetChanged()
+        }
     }
 
     private class ViewHolder(view: View?, position: Int, context: Context) {
@@ -97,7 +122,7 @@ class ListPipesActivity : AppCompatActivity() {
         val tvContent: TextView
         val ivDelete: ImageView
         val ivEdit: ImageView
-        var db_id : Int = 0
+        var db_id : String = ""
         var context : Context = context
 
 
@@ -132,13 +157,8 @@ class ListPipesActivity : AppCompatActivity() {
                 builder.setMessage("Eintrag wirklich löschen?")
 
                 builder.setPositiveButton("YES"){dialog, which ->
-                    var db = DataBaseHandler(context)
-                    db.DeleteDataPipes(db_id)
-                    (context as Activity).finish()
-
-                    //Reload activity to refresh Data
-                    val intent = Intent(this.context, ListPipesActivity::class.java)
-                    this.context.startActivity(intent)
+                    val DaoPipes = TGA_RoomDatabase.getDatabase(context).DaoPipes()
+                    DaoPipes.deletePipe(db_id)
                 }
 
                 builder.setNegativeButton("No"){dialog, which ->
@@ -152,4 +172,30 @@ class ListPipesActivity : AppCompatActivity() {
             }
         }
     }
+}
+
+class PipeViewModel(application: Application) : AndroidViewModel(application) {
+
+    private var parentJob = Job()
+    // By default all the coroutines launched in this scope should be using the Main dispatcher
+    private val coroutineContext: CoroutineContext
+        get() = parentJob + Dispatchers.Main
+    private val scope = CoroutineScope(coroutineContext)
+    private val context = application
+
+    val PipesRepository = PipesRepository(application)
+
+    var Pipes = PipesRepository.getAllPipes()
+
+    fun init()  = scope.launch(Dispatchers.IO){
+        CreateAppList(context)
+        Pipes = PipesRepository.getAllPipes()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        parentJob.cancel()
+    }
+
+
 }
