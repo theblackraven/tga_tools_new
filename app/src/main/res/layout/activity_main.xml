@@ -7,10 +7,22 @@
     tools:context="com.example.theblackraven.tga_tools.MainActivity">
 
 
-    <ListView
-    android:id="@+id/lvApps"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
+        <SearchView
+            android:id="@+id/sv_apps"
+            android:layout_width="match_parent"
+            android:layout_height="80dp" />
+
+        <ListView
+            android:id="@+id/lvApps"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
     </LinearLayout>
+
+
+</LinearLayout>

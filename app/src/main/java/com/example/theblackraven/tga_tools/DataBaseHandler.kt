@@ -49,20 +49,29 @@ interface DaoApps {
     @Query("SELECT * from table_apps ORDER BY app_name DESC")
     fun getAllApps(): List<Apps>
 
-    @Query("SELECT * from table_apps WHERE visible = 1 ORDER BY id, used_count DESC")
+    @Query("SELECT * from table_apps WHERE visible = 1 ORDER BY id, app_name_location DESC")
     fun getAllApps_LiveData(): LiveData<List<Apps>>
 
+    @Query("UPDATE table_apps SET visible = 0, activated = 0 " )
+    fun setAllInvisible()
+
+    @Query("UPDATE table_apps SET visible = 1 WHERE parent_ids ='' " )
+    fun setFirstCategoryVisible()
+
+    @Query("UPDATE table_apps SET visible = 1 WHERE app_name_location LIKE  '%' || :pattern || '%' AND runable = 1"  )
+    fun search(pattern : String)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun InsertDataApps(Apps: Apps)
+    fun insert(Apps: Apps)
 
     @Query("UPDATE table_apps SET used_count = used_count + 1 WHERE app_name = :app_name")
     fun used_count(app_name:String)
 
     @Query("UPDATE table_apps SET visible = 0, activated = 0 WHERE parent_ids LIKE  '%ID' || :s_id || '%' AND not id = :n_id" )
-    fun invisible(s_id: String, n_id : Int)
+    fun setInvisible(s_id: String, n_id : Int)
 
     @Query("UPDATE table_apps SET visible = 1 WHERE parent_ids LIKE '%' || :s_id AND not id = :n_id" )
-    fun visible(s_id: String, n_id : Int)
+    fun setVisible(s_id: String, n_id : Int)
 
     @Query("UPDATE table_apps SET activated = :activate WHERE id = :id" )
     fun acitvate(id: Int, activate : Boolean)
@@ -97,7 +106,7 @@ abstract class TGA_Apps_Database : RoomDatabase() {
     }
 }
 
-@Database(entities = [Apps::class, Pipes::class], version = 2)
+@Database(entities = [Pipes::class], version = 2)
 abstract class TGA_RoomDatabase : RoomDatabase() {
 
     abstract fun DaoPipes(): DaoPipes

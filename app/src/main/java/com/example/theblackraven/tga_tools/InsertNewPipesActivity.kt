@@ -141,6 +141,7 @@ class InsertNewPipesActivity : AppCompatActivity() {
                     pipe.id = toMD5Hash(pipe.toString())
                     val DaoPipes = TGA_RoomDatabase.getDatabase(context).DaoPipes()
                     DaoPipes.InsertPipes(pipe)
+                    finish()
 
                 }
                 else
@@ -148,11 +149,12 @@ class InsertNewPipesActivity : AppCompatActivity() {
                     pipe.id = db_id
                     val DaoPipes = TGA_RoomDatabase.getDatabase(context).DaoPipes()
                     DaoPipes.Update(pipe)
+                    finish()
                 }
             } else {
                 Toast.makeText(context,"Please Fill All Data's",Toast.LENGTH_SHORT).show()
             }
-            finish()
+
         }
 
 

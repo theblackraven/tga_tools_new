@@ -22,4 +22,5 @@
             <string name="Apps_Pipes_Show">Rohre anzeigen</string>
             <string name="Apps_Pipes_Add">Rohre hinzufügen</string>
     <string name="Apps_Storage">Speicher</string>
+        <string name="Apps_Storage_capacity">Speicherkapazität</string>
 </resources>

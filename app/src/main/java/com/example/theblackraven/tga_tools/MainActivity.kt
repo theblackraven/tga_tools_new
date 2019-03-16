@@ -24,7 +24,7 @@ import android.util.DisplayMetrics
 
 
 
-class MainActivity() : AppCompatActivity() {
+class MainActivity() : AppCompatActivity()  {
 
 
     private lateinit  var AppsViewModel1: AppsViewModel
@@ -44,7 +44,7 @@ class MainActivity() : AppCompatActivity() {
         lvApps.adapter = adapter
 
 
-        AppsViewModel1.Apps.observe(this, Observer { Apps ->
+        AppsViewModel1.getApps().observe(this, Observer { Apps ->
             if (Apps != null) {
                 ListApps = Apps.toMutableList()
                 adapter.update(ListApps)
@@ -58,7 +58,30 @@ class MainActivity() : AppCompatActivity() {
             adapter.open_app(position)
         }
 
+
+            val searchItem = findViewById<SearchView>(R.id.sv_apps)
+
+            searchItem.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+
+                override fun onQueryTextChange(newText: String): Boolean {
+                    if (newText.length > 0) {
+                        AppsViewModel1.search(newText)
+                    }
+                    else
+                    {
+                        AppsViewModel1.clear()
+                    }
+                    return false
+                }
+
+                override fun onQueryTextSubmit(query: String): Boolean {
+                    // task HERE
+                    return false
+                }
+
+            })
         }
+
 
 
     inner class AppAdapter : BaseAdapter {         //BaseAdapter implements ListAdapter, SpinnerAdapter;
@@ -85,36 +108,31 @@ class MainActivity() : AppCompatActivity() {
                 vh = view.tag as MainActivity.ViewHolder
             }
 
-            vh.app_name.text = getStringResource(notesList[position].app_name)
+            vh.app_name.text = (notesList[position].app_name_location)
             val level = notesList[position].parent_ids.split("ID").size - 1
             try {
                 val lp = LinearLayout.LayoutParams(vh.app_name.getLayoutParams())
                 lp.setMargins(convertDpToPx(level * 15, vh.app_name.getResources().getDisplayMetrics()),lp.topMargin, lp.rightMargin, lp.bottomMargin)
                 if (!notesList[position].runable) {
                     if (level == 0) {
-                        vh.app_name.setBackgroundColor(Color.parseColor("#aaaaaa"))
-                        vh.counter.setBackgroundColor(Color.parseColor("#aaaaaa"))
-                        vh.ivApp.setBackgroundColor(Color.parseColor("#aaaaaa"))
+                        vh.app_name.setBackgroundResource(R.drawable.round_left_1)
+                        vh.ivApp.setBackgroundResource(R.drawable.round_right_1)
                     }
                     else if (level == 1) {
-                        vh.app_name.setBackgroundColor(Color.parseColor("#00bbbb"))
-                        vh.counter.setBackgroundColor(Color.parseColor("#00bbbb"))
-                        vh.ivApp.setBackgroundColor(Color.parseColor("#00bbbb"))
+                        vh.app_name.setBackgroundResource(R.drawable.round_left_2)
+                        vh.ivApp.setBackgroundResource(R.drawable.round_right_2)
                     }
                 }
                 else{
-                    vh.app_name.setBackgroundColor(Color.parseColor("#ffffff"))
-                    vh.counter.setBackgroundColor(Color.parseColor("#ffffff"))
-                    vh.ivApp.setBackgroundColor(Color.parseColor("#ffffff"))
+                    vh.app_name.setBackgroundResource(R.drawable.round_left_runable)
+                    vh.ivApp.setBackgroundResource(R.drawable.round_right_runable)
                 }
 
                 vh.app_name.setLayoutParams(lp)
-                vh.counter.setLayoutParams(lp)
             }
             catch (e: Throwable){
 
             }
-            vh.counter.text = notesList[position].used_count.toString()
             vh.ivApp.setImageResource(getImageId(notesList[position].app_name))
 
             return view
@@ -145,15 +163,14 @@ class MainActivity() : AppCompatActivity() {
 
         fun activate(position : Int)
         {
-            val db = TGA_Apps_Database.getDatabase(context)
-            val DaoApps = db.DaoApps()
+            val AppsRepository = AppsRepository(context)
             if (notesList[position].runable == false && notesList[position].activated == false ) {
-                DaoApps.visible(notesList[position].id.toString(), notesList[position].id)
-                DaoApps.acitvate(notesList[position].id, true)
+                AppsRepository.setVisible(notesList[position].id.toString(), notesList[position].id)
+                AppsRepository.activate(notesList[position].id, true)
             }
             else if (notesList[position].runable == false && notesList[position].activated == true ) {
-                DaoApps.invisible(notesList[position].id.toString(), notesList[position].id)
-                DaoApps.acitvate(notesList[position].id, false)
+                AppsRepository.setInvisible(notesList[position].id.toString(), notesList[position].id)
+                AppsRepository.activate(notesList[position].id, false)
             }
         }
 
@@ -161,32 +178,15 @@ class MainActivity() : AppCompatActivity() {
         {
             apps_open_app(notesList[position].app_name, context)
         }
-
-        //Get String Reosource
-        private fun getStringResource(string:String) : String
-        {
-            var stringResource : String = string
-            try {
-               stringResource = getResources().getString(getResources().getIdentifier(string, "string", getPackageName()))
-                return stringResource
-            }
-            catch (e: Throwable ) {
-                return string
-            }
-
-        }
-
     }
     private class ViewHolder(view: View?, context: Context) {
         val app_name: TextView
-        val counter: TextView
         val ivApp: ImageView
         var context : Context = context
 
 
         init {
             this.app_name = view?.findViewById<TextView>(R.id.tvapp_name) as TextView
-            this.counter = view?.findViewById<TextView>(R.id.tvCounter) as TextView
             this.ivApp = view?.findViewById<ImageView>(R.id.ivApp) as ImageView
         }
     }
@@ -201,19 +201,33 @@ class AppsViewModel(application: Application) : AndroidViewModel(application) {
     private val scope = CoroutineScope(coroutineContext)
     private val context = application
 
-    val AppsRepository = AppsRepository(application)
+    private val AppsRepository = AppsRepository(application)
+    private var Apps = AppsRepository.getAllApps()
 
 
-    var Apps = AppsRepository.getAllApps()
+    fun getApps(): LiveData<List<Apps>>{
+    return Apps
+    }
 
     fun init()  = scope.launch(Dispatchers.IO){
           CreateAppList(context)
-          Apps = AppsRepository.getAllApps()
     }
 
     override fun onCleared() {
         super.onCleared()
         parentJob.cancel()
+    }
+
+    fun search(pattern: String){
+        AppsRepository.setAllInvisible()
+        AppsRepository.search(pattern)
+
+    }
+
+    fun clear()
+    {
+        AppsRepository.setAllInvisible()
+        AppsRepository.setFirstCategoryVisible()
     }
 
 
