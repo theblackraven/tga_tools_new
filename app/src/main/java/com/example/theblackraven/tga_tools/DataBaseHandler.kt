@@ -112,7 +112,7 @@ interface DaoApps {
     fun update(app_name : String, id : Int, parent_ids : String)
 }
 
-@Database(entities = [Apps::class, Pipes_persistant::class], version = 1)
+@Database(entities = [Apps::class, Pipes::class], version = 1)
 abstract class TGA_Database_non_persistant : RoomDatabase() {
 
     abstract fun DaoApps(): DaoApps
