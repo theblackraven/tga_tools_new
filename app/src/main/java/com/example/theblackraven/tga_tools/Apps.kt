@@ -64,7 +64,7 @@ fun getImageId(app_name : String) : Int{
 fun apps_open_app(app_name: String, context:Context)
 {
 
-    TGA_Apps_Database.getDatabase(context).DaoApps().used_count(app_name)// Count everytime app is started
+    TGA_Database_non_persistant.getDatabase(context).DaoApps().used_count(app_name)// Count everytime app is started
 
     if (app_name == "Apps_Pipes_Add")
     {

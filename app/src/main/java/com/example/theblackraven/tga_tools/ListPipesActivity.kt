@@ -1,6 +1,5 @@
 package com.example.theblackraven.tga_tools
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.app.Application
 import android.arch.lifecycle.AndroidViewModel
@@ -10,13 +9,10 @@ import android.content.Context
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.content.ContextCompat.startActivity
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import kotlinx.android.synthetic.main.activity_listpipes.*
-import android.content.DialogInterface
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -33,7 +29,13 @@ class ListPipesActivity : AppCompatActivity() {
         setContentView(R.layout.activity_listpipes)
 
 
+
         val context = this
+
+        val DaoPipes = TGA_Database_non_persistant.getDatabase(context).DaoPipes()
+        val DaoPipes_persistent = TGA_RoomDatabase.getDatabase(context).DaoPipes_persistant()
+        DaoPipes.insertAll(Pipes_persistant2Pipes(DaoPipes_persistent.getAllPipes()))
+
        // Liste für die Rohre
         var ListPipes = mutableListOf<Pipes>()
             //var data = db.Get_All_Columns_Pipes("Select * from " + Constants_DB_Pipes.TABLE_NAME_PIPES +  " WHERE " + Constants_DB_Pipes.COL_PIPEMANUFACTURER + " LIKE 'Geberit'" )
@@ -58,8 +60,30 @@ class ListPipesActivity : AppCompatActivity() {
 
         })
             lvPipes.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, position, id ->
-                Toast.makeText(this, "Click on " + ListPipes[position].typ_manufacturer, Toast.LENGTH_SHORT).show()
+                adapter.activate(position)
             }
+
+        val searchItem = findViewById<SearchView>(R.id.sv_pipes)
+
+        searchItem.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                if (newText.length > 0) {
+                    PipeViewModel1.search(newText)
+                }
+                else
+                {
+                    PipeViewModel1.clear()
+                }
+                return false
+            }
+
+            override fun onQueryTextSubmit(query: String): Boolean {
+                // task HERE
+                return false
+            }
+
+        })
 
 
     }
@@ -95,6 +119,16 @@ class ListPipesActivity : AppCompatActivity() {
             vh.tvContent.text = notesList[position].typ_manufacturer + " DN:" + notesList[position].dn
             vh.db_id = notesList[position].id
 
+            if (notesList[position].category == true) {
+                vh.ivDelete.visibility = View.INVISIBLE
+                vh.ivEdit.visibility = View.INVISIBLE
+            }
+            else {
+                vh.ivDelete.visibility = View.VISIBLE
+                vh.ivEdit.visibility = View.VISIBLE
+            }
+
+
             return view
         }
 
@@ -115,6 +149,29 @@ class ListPipesActivity : AppCompatActivity() {
             notesList = Pipes
             notifyDataSetChanged()
         }
+
+        fun activate(position : Int)
+        {
+            val PipesRepository = PipesRepository(context)
+            if (notesList[position].category == true && notesList[position].activated == false ) {
+                if (notesList[position].typ_manufacturer == "") {
+                    PipesRepository.setVisibleCategory(notesList[position].manufacturer)
+                }
+                else {
+                    PipesRepository.setVisiblePipes(notesList[position].manufacturer, notesList[position].typ_manufacturer)
+                }
+                PipesRepository.activate(notesList[position].id, true)
+            }
+            else if (notesList[position].category == true && notesList[position].activated == true ) {
+                if (notesList[position].typ_manufacturer == "") {
+                    PipesRepository.setInvisibleCategory(notesList[position].manufacturer)
+                }
+                else {
+                    PipesRepository.setInvisiblePipes(notesList[position].manufacturer, notesList[position].typ_manufacturer)
+                }
+                PipesRepository.activate(notesList[position].id, false)
+            }
+        }
     }
 
     private class ViewHolder(view: View?, position: Int, context: Context) {
@@ -124,6 +181,7 @@ class ListPipesActivity : AppCompatActivity() {
         val ivEdit: ImageView
         var db_id : String = ""
         var context : Context = context
+
 
 
 
@@ -138,39 +196,38 @@ class ListPipesActivity : AppCompatActivity() {
             this.tvContent = view?.findViewById<TextView>(R.id.tvContent) as TextView
             this.ivDelete =   view?.findViewById<ImageView>(R.id.ivDelete) as ImageView
             this.ivEdit =   view?.findViewById<ImageView>(R.id.ivEdit) as ImageView
-            this.ivDelete.setOnClickListener{
-                Log.i("Delete", "Delete pressed Postion: " + db_id)
 
-            }
 
-            this.ivEdit.setOnClickListener{
-                //Toast.makeText(this.context, this.context.toString() , Toast.LENGTH_SHORT).show()
-                val intent = Intent(this.context, InsertNewPipesActivity::class.java)
-                intent.putExtra(KEY_WORDS_INSERTNEWPIPESACTIVITY.DB_ID, db_id.toString())
-                this.context.startActivity(intent)
-            }
-
-            this.ivDelete.setOnClickListener{
-                val builder = AlertDialog.Builder(this.context)
-
-                builder.setTitle("Bestätigen")
-                builder.setMessage("Eintrag wirklich löschen?")
-
-                builder.setPositiveButton("YES"){dialog, which ->
-                    val DaoPipes = TGA_RoomDatabase.getDatabase(context).DaoPipes()
-                    DaoPipes.deletePipe(db_id)
+                this.ivEdit.setOnClickListener {
+                    //Toast.makeText(this.context, this.context.toString() , Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this.context, InsertNewPipesActivity::class.java)
+                    intent.putExtra(KEY_WORDS_INSERTNEWPIPESACTIVITY.DB_ID, db_id.toString())
+                    this.context.startActivity(intent)
                 }
 
-                builder.setNegativeButton("No"){dialog, which ->
+                this.ivDelete.setOnClickListener {
+                    val builder = AlertDialog.Builder(this.context)
 
-                    dialog.dismiss()
+                    builder.setTitle("Bestätigen")
+                    builder.setMessage("Eintrag wirklich löschen?")
+
+                    builder.setPositiveButton("YES") { dialog, which ->
+                        val DaoPipes = TGA_Database_non_persistant.getDatabase(context).DaoPipes()
+                        DaoPipes.deletePipe(db_id)
+                    }
+
+                    builder.setNegativeButton("No") { dialog, which ->
+
+                        dialog.dismiss()
+                    }
+
+                    val dialog: AlertDialog = builder.create()
+                    dialog.show()
+
                 }
-
-                val dialog: AlertDialog = builder.create()
-                dialog.show()
-
             }
-        }
+
+
     }
 }
 
@@ -195,6 +252,18 @@ class PipeViewModel(application: Application) : AndroidViewModel(application) {
     override fun onCleared() {
         super.onCleared()
         parentJob.cancel()
+    }
+
+    fun search(pattern: String){
+        PipesRepository.setAllInvisible()
+        PipesRepository.search(pattern)
+
+    }
+
+    fun clear()
+    {
+        PipesRepository.setAllInvisible()
+        PipesRepository.setFirstCategoryVisible()
     }
 
 

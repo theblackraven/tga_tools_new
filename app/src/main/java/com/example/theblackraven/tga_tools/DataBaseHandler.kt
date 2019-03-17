@@ -1,23 +1,25 @@
 package com.example.theblackraven.tga_tools
 
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
 import android.arch.persistence.room.*
-import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor.FIELD_TYPE_STRING
-import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteDatabase.CONFLICT_IGNORE
-import android.database.sqlite.SQLiteDatabase.createInMemory
-import android.database.sqlite.SQLiteOpenHelper
-import android.widget.Toast
 
 /**
  * Created by theblackraven 2018-09-30
  */
 @Dao
 interface DaoPipes{
-    @Query("SELECT * from table_pipes ORDER BY manufacturer ASC")
+
+    @Query("UPDATE table_pipes SET visible = 0, activated = 0 " )
+    fun setAllInvisible()
+
+    @Query("UPDATE table_pipes SET visible = 1 WHERE typ_manufacturer = '' " )
+    fun setFirstCategoryVisible()
+
+    @Query("UPDATE table_pipes SET visible = 1 WHERE typ_manufacturer LIKE  '%' || :pattern || '%' OR typ LIKE  '%' || :pattern || '%' OR DN LIKE  '%' || :pattern || '%' AND category = 0"  )
+    fun search(pattern : String)
+
+    @Query("SELECT * from table_pipes WHERE visible = 1 ORDER BY manufacturer ASC, typ ASC")
     fun getAllPipes(): LiveData<List<Pipes>>
 
     @Query("SELECT * from table_pipes WHERE id LIKE :id")
@@ -38,10 +40,40 @@ interface DaoPipes{
     @Query("SELECT DISTINCT typ_manufacturer FROM table_pipes")
     fun getDestinctTypManufacturer() : List<String>
 
+    @Query("UPDATE table_pipes SET visible = 1 WHERE manufacturer = :manufactuer AND category = 1" )
+    fun setVisibleCategory(manufactuer: String)
 
+    @Query("UPDATE table_pipes SET visible = 0, activated = 0 WHERE manufacturer = :manufactuer  AND typ_manufacturer <> '' ")
+    fun setInvisibleCategory(manufactuer: String)
+
+    @Query("UPDATE table_pipes SET visible = 1 WHERE typ_manufacturer =  :typ_manufactuer AND manufacturer = :manufactuer AND category = 0" )
+    fun setVisiblePipes(manufactuer: String, typ_manufactuer : String)
+
+    @Query("UPDATE table_pipes SET visible = 0 WHERE typ_manufacturer =  :typ_manufactuer AND manufacturer = :manufactuer AND category = 0" )
+    fun setInvisiblePipes(manufactuer: String, typ_manufactuer : String)
+
+    @Query("UPDATE table_pipes SET activated = :activate WHERE id = :id" )
+    fun acitvate(id: String, activate : Boolean)
 
     @Update()
     fun Update (vararg pipe: Pipes)
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertAll(ListPipes: List<Pipes>)
+
+}
+
+@Dao
+interface DaoPipes_persistent{
+
+    @Query("SELECT * from table_pipes_persistent")
+    fun getAllPipes(): List<Pipes_persistant>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun InsertPipes(Pipes: Pipes_persistant)
+
+    @Update()
+    fun Update (vararg pipe: Pipes_persistant)
 }
 
 @Dao
@@ -80,16 +112,17 @@ interface DaoApps {
     fun update(app_name : String, id : Int, parent_ids : String)
 }
 
-@Database(entities = [Apps::class], version = 2)
-abstract class TGA_Apps_Database : RoomDatabase() {
+@Database(entities = [Apps::class, Pipes_persistant::class], version = 1)
+abstract class TGA_Database_non_persistant : RoomDatabase() {
 
     abstract fun DaoApps(): DaoApps
+    abstract fun DaoPipes(): DaoPipes
 
     companion object {
         @Volatile
-        private var INSTANCE: TGA_Apps_Database? = null
+        private var INSTANCE: TGA_Database_non_persistant? = null
 
-        fun getDatabase(context: Context): TGA_Apps_Database {
+        fun getDatabase(context: Context): TGA_Database_non_persistant {
             val tempInstance = INSTANCE
             if (tempInstance != null) {
                 return tempInstance
@@ -97,7 +130,7 @@ abstract class TGA_Apps_Database : RoomDatabase() {
             synchronized(this) {
                 val instance = Room.inMemoryDatabaseBuilder(
                         context.applicationContext,
-                        TGA_Apps_Database::class.java
+                        TGA_Database_non_persistant::class.java
                 ).allowMainThreadQueries().build() //#Todo run querrys not in Main Thread
                 INSTANCE = instance
                 return instance
@@ -106,10 +139,10 @@ abstract class TGA_Apps_Database : RoomDatabase() {
     }
 }
 
-@Database(entities = [Pipes::class], version = 2)
+@Database(entities = [Pipes_persistant::class], version = 1)
 abstract class TGA_RoomDatabase : RoomDatabase() {
 
-    abstract fun DaoPipes(): DaoPipes
+    abstract fun DaoPipes_persistant(): DaoPipes_persistent
 
     companion object {
         @Volatile

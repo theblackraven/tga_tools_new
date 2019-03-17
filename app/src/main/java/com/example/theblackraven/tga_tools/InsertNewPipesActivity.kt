@@ -1,15 +1,10 @@
 package com.example.theblackraven.tga_tools
 
-import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.ListAdapter
 import android.widget.Toast
-import android.widget.Toast.LENGTH_LONG
 import kotlinx.android.synthetic.main.activity_insertnewpipes.*
 import java.security.MessageDigest
 
@@ -43,10 +38,15 @@ class InsertNewPipesActivity : AppCompatActivity() {
             Log.i("InsertNewPipesActivity", "db_id: " + db_id)
         }
 
+        val DaoPipes = TGA_Database_non_persistant.getDatabase(context).DaoPipes()
+        val DaoPipes_persistent = TGA_RoomDatabase.getDatabase(context).DaoPipes_persistant()
+        DaoPipes.insertAll(Pipes_persistant2Pipes(DaoPipes_persistent.getAllPipes()))
+
 
         if (db_id != null) //load data from pipe and insert values
         {
-            val DaoPipes = TGA_RoomDatabase.getDatabase(context).DaoPipes()
+
+
             pipe = DaoPipes.getPipe(db_id)
             ac_pipe_manufacturer.setText(pipe.manufacturer)
             ac_pipe__typ_manufacturer.setText(pipe.typ_manufacturer)
@@ -58,9 +58,6 @@ class InsertNewPipesActivity : AppCompatActivity() {
             btn_insert_update.setText("Update")
         }
 
-
-        val DaoPipes = TGA_RoomDatabase.getDatabase(context).DaoPipes()
-        //get existing manufactuer
 
         var data_manufactures = DaoPipes.getDestinctManufactuer()
         for (i in 0..(data_manufactures.size - 1)) {
@@ -136,19 +133,52 @@ class InsertNewPipesActivity : AppCompatActivity() {
             if (ac_pipetyp.text.toString().length > 0 && ac_pipe_manufacturer.text.toString().length > 0 && ac_pipe__typ_manufacturer.text.toString().length > 0 && ac_pipe_dn.text.toString().length > 0 && etv_di.text.toString().length > 0  && etv_k.text.toString().length > 0 && etv_do.text.toString().length > 0
             ) {
 
-                    var pipe = Pipes(ac_pipetyp.text.toString(), ac_pipe_manufacturer.text.toString(), ac_pipe__typ_manufacturer.text.toString(), etv_do.text.toString().toFloat(), etv_di.text.toString().toFloat(), etv_k.text.toString().toFloat(), ac_pipe_dn.text.toString().toInt())
+                    var pipe = Pipes(ac_pipetyp.text.toString(), ac_pipe_manufacturer.text.toString(), ac_pipe__typ_manufacturer.text.toString(),false, etv_do.text.toString().toFloat(), etv_di.text.toString().toFloat(), etv_k.text.toString().toFloat(), ac_pipe_dn.text.toString().toInt())
+                    var pipe_persistant = Pipes_persistant(ac_pipetyp.text.toString(), ac_pipe_manufacturer.text.toString(), ac_pipe__typ_manufacturer.text.toString(),false, etv_do.text.toString().toFloat(), etv_di.text.toString().toFloat(), etv_k.text.toString().toFloat(), ac_pipe_dn.text.toString().toInt())
                 if (db_id == null) { //add new pipe
-                    pipe.id = toMD5Hash(pipe.toString())
-                    val DaoPipes = TGA_RoomDatabase.getDatabase(context).DaoPipes()
+                    pipe.id = toMD5Hash(ac_pipetyp.text.toString() + ac_pipe_manufacturer.text.toString() + ac_pipe__typ_manufacturer.text.toString()+ false.toString() + etv_do.text.toString() + etv_di.text.toString() + etv_k.text.toString() + ac_pipe_dn.text.toString())
+                    pipe_persistant.id = toMD5Hash(ac_pipetyp.text.toString() + ac_pipe_manufacturer.text.toString() + ac_pipe__typ_manufacturer.text.toString()+ false.toString() + etv_do.text.toString() + etv_di.text.toString() + etv_k.text.toString() + ac_pipe_dn.text.toString())
+
+                    val DaoPipes = TGA_Database_non_persistant.getDatabase(context).DaoPipes()
+                    val DaoPipes_persistent = TGA_RoomDatabase.getDatabase(context).DaoPipes_persistant()
+
+                    var manufacturer = Pipes("",pipe.manufacturer,"",true)
+                    var manufacturer_persistent = Pipes_persistant("",pipe.manufacturer,"",true)
+
+                    manufacturer.id = toMD5Hash(pipe.manufacturer)
+                    manufacturer_persistent.id = toMD5Hash(pipe.manufacturer)
+
+                    manufacturer.visible = true
+                    manufacturer_persistent.visible = true
+
+                    var manufacturer_typ = Pipes("",pipe.manufacturer,pipe.typ_manufacturer  ,true)
+                    var manufacturer_typ_persistant = Pipes_persistant("",pipe.manufacturer,pipe.typ_manufacturer  ,true)
+
+                    manufacturer_typ.id =  toMD5Hash(pipe.manufacturer + "_" + pipe.typ_manufacturer)
+                    manufacturer_typ_persistant.id =  toMD5Hash(pipe.manufacturer + "_" + pipe.typ_manufacturer)
+
+                    DaoPipes.InsertPipes(manufacturer)
+                    DaoPipes_persistent.InsertPipes(manufacturer_persistent)
+
+                    DaoPipes.InsertPipes(manufacturer_typ)
+                    DaoPipes_persistent.InsertPipes(manufacturer_typ_persistant)
+
                     DaoPipes.InsertPipes(pipe)
+                    DaoPipes_persistent.InsertPipes(pipe_persistant)
                     finish()
 
                 }
                 else
                 {
                     pipe.id = db_id
-                    val DaoPipes = TGA_RoomDatabase.getDatabase(context).DaoPipes()
+                    pipe_persistant.id = db_id
+
+                    val DaoPipes = TGA_Database_non_persistant.getDatabase(context).DaoPipes()
+                    val DaoPipes_persistent = TGA_RoomDatabase.getDatabase(context).DaoPipes_persistant()
+
                     DaoPipes.Update(pipe)
+                    DaoPipes_persistent.Update(pipe_persistant)
+
                     finish()
                 }
             } else {
