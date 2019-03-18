@@ -113,7 +113,11 @@ class MainActivity() : AppCompatActivity()  {
             try {
                 val lp = LinearLayout.LayoutParams(vh.app_name.getLayoutParams())
                 lp.setMargins(convertDpToPx(level * 15, vh.app_name.getResources().getDisplayMetrics()),lp.topMargin, lp.rightMargin, lp.bottomMargin)
+                vh.app_name.setLayoutParams(lp)
+
                 if (!notesList[position].runable) {
+                    vh.app_name.setTextColor(getResources().getColor(R.color.colorPrimary))
+                    /*
                     if (level == 0) {
                         vh.app_name.setBackgroundResource(R.drawable.round_left_1)
                         vh.ivApp.setBackgroundResource(R.drawable.round_right_1)
@@ -121,14 +125,17 @@ class MainActivity() : AppCompatActivity()  {
                     else if (level == 1) {
                         vh.app_name.setBackgroundResource(R.drawable.round_left_2)
                         vh.ivApp.setBackgroundResource(R.drawable.round_right_2)
-                    }
+                    }*/
                 }
                 else{
+                    vh.app_name.setTextColor(getResources().getColor(R.color.colorRunable))
+                    /*
                     vh.app_name.setBackgroundResource(R.drawable.round_left_runable)
                     vh.ivApp.setBackgroundResource(R.drawable.round_right_runable)
+                    */
                 }
 
-                vh.app_name.setLayoutParams(lp)
+
             }
             catch (e: Throwable){
 
@@ -136,11 +143,6 @@ class MainActivity() : AppCompatActivity()  {
             vh.ivApp.setImageResource(getImageId(notesList[position].app_name))
 
             return view
-        }
-
-        private fun convertDpToPx(dp: Int, displayMetrics: DisplayMetrics): Int {
-            val pixels = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), displayMetrics)
-            return Math.round(pixels)
         }
 
         override fun getItem(position: Int): Any {

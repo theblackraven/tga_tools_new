@@ -5,5 +5,5 @@
     <color name="colorAccent">#D81B60</color>
     <color name="colorTopCategory">#d1d1d1</color>
     <color name="colorCategory1">#eaeaea</color>
-    <color name="colorRunable">#ffffff</color>
+    <color name="colorRunable">#0000ff</color>
 </resources>

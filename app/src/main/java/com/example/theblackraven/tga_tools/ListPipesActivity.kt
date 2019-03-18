@@ -18,6 +18,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
+import android.util.TypedValue
+
+
 
 
 class ListPipesActivity : AppCompatActivity() {
@@ -115,9 +118,34 @@ class ListPipesActivity : AppCompatActivity() {
                 vh = view.tag as ViewHolder
             }
 
-            vh.tvTitle.text = notesList[position].manufacturer + " " + notesList[position].typ
-            vh.tvContent.text = notesList[position].typ_manufacturer + " DN:" + notesList[position].dn
             vh.db_id = notesList[position].id
+            var level : Int
+
+
+            if (notesList[position].typ_manufacturer != "" && notesList[position].category == true ) {
+                level = 1
+                vh.tvTitle.text = notesList[position].typ_manufacturer
+                vh.tvContent.text = ""
+                vh.tvTitle.setTextColor(getResources().getColor(R.color.colorPrimary))
+            }
+            else if (notesList[position].category == true)  {
+                level = 0
+                vh.tvTitle.text = notesList[position].manufacturer
+                vh.tvContent.text = ""
+                vh.tvTitle.setTextColor(getResources().getColor(R.color.colorPrimaryDark))
+            }
+            else{
+                level = 2
+                vh.tvTitle.text = notesList[position].manufacturer + " " + notesList[position].typ
+                vh.tvContent.text = notesList[position].typ_manufacturer + " DN:" + notesList[position].dn
+                vh.tvTitle.setTextColor(getResources().getColor(R.color.colorRunable))
+            }
+
+
+            val paddingDp : Float = level * 15f
+            val paddingPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, paddingDp, context.resources.displayMetrics).toInt()
+            vh.tvTitle.setPadding(paddingPx, 0,0,0)
+            vh.tvContent.setPadding(paddingPx, 0,0,0)
 
             if (notesList[position].category == true) {
                 vh.ivDelete.visibility = View.INVISIBLE

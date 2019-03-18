@@ -15,7 +15,6 @@
                 android:layout_marginLeft="10dp"
                 android:text="App"
                 android:textColor="@color/colorPrimary"
-                android:background="@drawable/round_left_1"
                 android:textSize="23dp" />
 
 
@@ -25,6 +24,5 @@
             android:id="@+id/ivApp"
             android:layout_width="60dp"
             android:layout_height="40dp"
-            android:background="@drawable/round_right_1"
             app:srcCompat="@mipmap/ic_launcher" />
     </LinearLayout>
